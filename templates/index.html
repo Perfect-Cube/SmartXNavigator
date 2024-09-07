@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path Finder</title>
+    <!-- Bootstrap for styling -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet CSS for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS for the form and layout -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #d7e5e5;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 700;
+            color: #000000;
+        }
+        h3 {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        #map {
+            height: 450px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 4px solid #000000;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 25px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .form-container:hover {
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .form-check {
+            margin-right: 30px;
+        }
+
+        .btn-custom {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background-color: #218838;
+            box-shadow: 0 0 10px rgba(33, 136, 56, 0.5);
+        }
+
+        .map-label {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SmartXNavigator</h1>
+    <h3>Tailor Your Journey — Find the Best Path for Your Needs!</h3>
+    <div class="container">
+        <div id="map"></div>
+
+        <div class="form-container mt-4">
+            <h3 class="text-center mb-4">Select Your Route Preferences</h3>
+            <div class="form-group">
+                <label class="map-label">Choose path preference:</label>
+                <div class="d-flex">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="path_type" value="distance" id="distance" checked>
+                        <label class="form-check-label" for="distance">Shortest Distance</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="path_type" value="quietness" id="quietness">
+                        <label class="form-check-label" for="quietness">Quietest Route</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="button" id="submit-btn" class="btn btn-custom">Find Path</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 SmartXNavigator | Designed with precision and care</p>
+    </footer>
+
+    <!-- Leaflet JS for maps -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Initialize the map centered at a default location
+        var map = L.map('map').setView([52.52, 13.4050], 13);  // Berlin coordinates
+
+        // Initialize the map centered at New Delhi, India
+        // var map = L.map('map').setView([28.6139, 77.2090], 13);  // New Delhi coordinates
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        var startMarker, endMarker;
+
+        // Function to handle user clicks on the map for start/end markers
+        function onMapClick(e) {
+            if (!startMarker) {
+                startMarker = L.marker(e.latlng, {draggable: true}).addTo(map).bindPopup("Start Point").openPopup();
+            } else if (!endMarker) {
+                endMarker = L.marker(e.latlng, {draggable: true}).addTo(map).bindPopup("End Point").openPopup();
+            } else {
+                alert("Both start and end points are already set. Drag the markers to reposition.");
+            }
+        }
+
+        // Event listener for map clicks
+        map.on('click', onMapClick);
+
+        // Button click event listener to submit the form and calculate route
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            if (startMarker && endMarker) {
+                let startCoords = startMarker.getLatLng();
+                let endCoords = endMarker.getLatLng();
+                let pathType = document.querySelector('input[name="path_type"]:checked').value;
+                let url = `/show_route?start_lat=${startCoords.lat}&start_lon=${startCoords.lng}&end_lat=${endCoords.lat}&end_lon=${endCoords.lng}&path_type=${pathType}`;
+                window.location.href = url;
+            } else {
+                alert("Please select both start and end points.");
+            }
+        });
+    </script>
+</body>
+</html>
